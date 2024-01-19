@@ -45,6 +45,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         }
         String articleVotedSetKey = Article.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
         String userVotedArticleSetKey = User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
+        String articleScoreQueueKey = Article.ARTICLE_PUBLISH_SCORE_KEY_PREFIX + article.getId();
         //可以投票
         //将投票用户ID加入到文章投票集合
         redisTemplate.opsForSet().add(articleVotedSetKey, user.getId());
@@ -55,6 +56,8 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             voteNum = redisTemplate.opsForHash().increment(articleInfoKey, article.getVotes(), 1L);
             //计算文章分数
             redisTemplate.opsForHash().increment(articleInfoKey, article.getScores(), Article.SCORE_PER_VOTE);
+            //增加文章分数队列中文章分数
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey,article.getAuthor(),Article.SCORE_PER_VOTE);
         }
 
         return AjaxResult.success(voteNum);
@@ -71,6 +74,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         //取消投票
         String articleInfoKey = Article.ARTICLE_INFO_HASH_KEY_PREFIX + article.getId();
         String userVotedArticleKey = User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
+        String articleScoreQueueKey = Article.ARTICLE_PUBLISH_SCORE_KEY_PREFIX + article.getId();
         //移除用户已投票文章集合中文章
         redisTemplate.opsForSet().remove(userVotedArticleKey, article.getId());
         //移除文章投票的用户集合中的用户
@@ -80,6 +84,8 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             //将文章信息中的投票数量减1,分数减1 * SCORE_PER_VOTE
             votes = redisTemplate.opsForHash().increment(articleInfoKey, article.getVotes(), -1L);
             redisTemplate.opsForHash().increment(articleInfoKey, article.getScores(), -1L * Article.SCORE_PER_VOTE);
+            //减少文章分数队列中文章分数
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey,article.getAuthor(),-1L * Article.SCORE_PER_VOTE);
         }
         article.setVotes(votes);
         return AjaxResult.success(article);

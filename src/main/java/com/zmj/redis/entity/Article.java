@@ -20,6 +20,16 @@ public class Article {
     public static final String ARTICLE_INFO_HASH_KEY_PREFIX = "article:info:";
 
     /**
+     * 文章发布时间队列redis key前缀
+     */
+    public static final String ARTICLE_PUBLISH_TIME_KEY_PREFIX = "article:publish:time:";
+
+    /**
+     * 文章发布分数队列redis key前缀
+     */
+    public static final String ARTICLE_PUBLISH_SCORE_KEY_PREFIX = "article:publish:score:";
+
+    /**
      * 文章id
      */
     private Long id;
