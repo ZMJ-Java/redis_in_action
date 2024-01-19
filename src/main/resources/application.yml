@@ -1,20 +1,18 @@
 spring:
-  port: 8080
-
   #redis基础配置
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    password: redis@123
-    database: 3
-    #redis配置连接池,使用Lettuce
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
-
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: redis@123
+      database: 3
+      #redis配置连接池,使用Lettuce
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
 
 
 
