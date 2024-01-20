@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author 14864
+ * @date 2024/01/20 4:20:00
+ */
 @Service
 public class ArticlePublishServiceImpl implements ArticlePublishService {
 
@@ -22,10 +26,10 @@ public class ArticlePublishServiceImpl implements ArticlePublishService {
 
     @Override
     public AjaxResult articlePublish(Article article) {
-        Long publishTime = System.currentTimeMillis();
-        String articleTimeQueueKey = Article.ARTICLE_PUBLISH_TIME_KEY_PREFIX + article.getId();
-        String articleVotedKey = Article.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
-        String articleScoreQueueKey = Article.ARTICLE_PUBLISH_TIME_KEY_PREFIX + article.getId();
+        long publishTime = System.currentTimeMillis();
+        String articleTimeQueueKey = Article.getArticlePublishTimeKey(article);
+        String articleVotedKey = Article.getArticleVotedSetKey(article);
+        String articleScoreQueueKey = Article.getArticlePublishScoreKey(article);
         //将自身加入到文章投票列表中
         redisTemplate.opsForSet().add(articleVotedKey, article.getAuthor().getId());
         //将文章加入到SortSet K:文章ID V:文章发布者 Score:发布时间

@@ -1,5 +1,8 @@
 package com.zmj.redis.entity;
 
+/**
+ * @author 14864
+ */
 public class Article {
     /**
      * 热点文章最少的投票数量
@@ -112,5 +115,33 @@ public class Article {
 
     public void setScores(Long scores) {
         this.scores = scores;
+    }
+
+    /**
+     * 获取文章信息 缓存key
+     */
+    public static String getArticleInfoHashKey(Article article) {
+        return Article.ARTICLE_INFO_HASH_KEY_PREFIX + article.getId();
+    }
+
+    /**
+     * 获取文章投票用户集合 缓存key
+     */
+    public static String getArticleVotedSetKey(Article article) {
+        return Article.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
+    }
+
+    /**
+     * 获取文章发布时间有序集合 缓存key
+     */
+    public static String getArticlePublishTimeKey(Article article) {
+        return Article.ARTICLE_PUBLISH_TIME_KEY_PREFIX + article.getId();
+    }
+
+    /**
+     * 获取文章发布分数有序集合 缓存key
+     */
+    public static String getArticlePublishScoreKey(Article article) {
+        return Article.ARTICLE_PUBLISH_SCORE_KEY_PREFIX + article.getId();
     }
 }

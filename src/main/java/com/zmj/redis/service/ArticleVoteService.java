@@ -4,6 +4,9 @@ import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.entity.Article;
 import com.zmj.redis.entity.User;
 
+/**
+ * @author 14864
+ */
 public interface ArticleVoteService {
     /**
      * 判断能否投票

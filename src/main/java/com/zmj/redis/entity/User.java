@@ -1,8 +1,11 @@
 package com.zmj.redis.entity;
 
+/**
+ * @author 14864
+ */
 public class User {
 
-    public static final String USER_ARTICLE_SET_KEY_PREFIX = "user:";
+    public static final String USER_ARTICLE_SET_KEY_PREFIX = "user:article:";
 
     /**
      * 用户id
@@ -28,4 +31,9 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
+
+    public static String getUserArticleSetKey(User user){
+       return User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
+    }
+
 }

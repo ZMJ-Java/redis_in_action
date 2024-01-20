@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author 14864
+ */
 @Service
 public class ArticleVoteServiceImpl implements ArticleVoteService {
     public static final Logger log = LoggerFactory.getLogger(ArticleVoteServiceImpl.class);
@@ -23,13 +26,13 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     @Override
     public Boolean canVote(User user, Article article) {
         //先判断投票人是否是作者本人
-        String userKeyId = User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
+        String userKeyId = User.getUserArticleSetKey(user);
         Boolean isAuthor = redisTemplate.opsForSet().isMember(userKeyId, article.getId());
         if (Boolean.TRUE.equals(isAuthor)) {
             return false;
         }
         //不是作者本人，在判断是否已经投过票
-        String articleVotedSetId = Article.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
+        String articleVotedSetId = Article.getArticleVotedSetKey(article);
         Boolean hasVote = redisTemplate.opsForSet().isMember(articleVotedSetId, user.getId());
         return !Boolean.TRUE.equals(hasVote);
     }
@@ -38,14 +41,14 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     public AjaxResult addArticleVotes(User user, Article article) {
         //先判断可不可以投票
         Boolean canVote = canVote(user, article);
-        String articleInfoKey = Article.ARTICLE_INFO_HASH_KEY_PREFIX + article.getId();
+        String articleInfoKey = Article.getArticleInfoHashKey(article);
         Long voteNum;
         if (!canVote) {
             return AjaxResult.error("您不可投票");
         }
-        String articleVotedSetKey = Article.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
-        String userVotedArticleSetKey = User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
-        String articleScoreQueueKey = Article.ARTICLE_PUBLISH_SCORE_KEY_PREFIX + article.getId();
+        String articleVotedSetKey = Article.getArticleVotedSetKey(article);
+        String userVotedArticleSetKey = User.getUserArticleSetKey(user);
+        String articleScoreQueueKey = Article.getArticlePublishScoreKey(article);
         //可以投票
         //将投票用户ID加入到文章投票集合
         redisTemplate.opsForSet().add(articleVotedSetKey, user.getId());
@@ -66,15 +69,15 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     @Override
     public AjaxResult cancelVote(User user, Article article) {
         //判断是否投过票
-        String articleVotedQueueId = Article.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
+        String articleVotedQueueId = Article.getArticleVotedSetKey(article);
         Boolean hasVote = redisTemplate.opsForSet().isMember(articleVotedQueueId, user.getId());
         if (Boolean.FALSE.equals(hasVote)) {
             return AjaxResult.error("您未投票，无法取消投票");
         }
         //取消投票
-        String articleInfoKey = Article.ARTICLE_INFO_HASH_KEY_PREFIX + article.getId();
-        String userVotedArticleKey = User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
-        String articleScoreQueueKey = Article.ARTICLE_PUBLISH_SCORE_KEY_PREFIX + article.getId();
+        String articleInfoKey = Article.getArticleInfoHashKey(article);
+        String userVotedArticleKey = User.getUserArticleSetKey(user);
+        String articleScoreQueueKey = Article.getArticlePublishScoreKey(article);
         //移除用户已投票文章集合中文章
         redisTemplate.opsForSet().remove(userVotedArticleKey, article.getId());
         //移除文章投票的用户集合中的用户
