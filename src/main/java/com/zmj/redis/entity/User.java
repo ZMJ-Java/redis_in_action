@@ -1,9 +1,11 @@
 package com.zmj.redis.entity;
 
+import java.io.Serializable;
+
 /**
  * @author 14864
  */
-public class User {
+public class User implements Serializable {
 
     public static final String USER_ARTICLE_SET_KEY_PREFIX = "user:article:";
 
@@ -32,8 +34,8 @@ public class User {
         this.name = name;
     }
 
-    public static String getUserArticleSetKey(User user){
-       return User.USER_ARTICLE_SET_KEY_PREFIX + user.getId();
+    public static String getUserArticleSetKey(Long userId){
+       return User.USER_ARTICLE_SET_KEY_PREFIX + userId;
     }
 
 }

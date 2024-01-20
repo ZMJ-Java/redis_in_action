@@ -1,9 +1,11 @@
 package com.zmj.redis.entity;
 
+import java.io.Serializable;
+
 /**
  * @author 14864
  */
-public class Article {
+public class Article implements Serializable {
     /**
      * 热点文章最少的投票数量
      */
@@ -41,9 +43,9 @@ public class Article {
      */
     private String title;
     /**
-     * 文章作者
+     * 文章作者Id
      */
-    private User author;
+    private Long userId;
     /**
      * 文章链接
      */
@@ -77,12 +79,9 @@ public class Article {
         this.title = title;
     }
 
-    public User getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
+    public Long getAuthor() {return userId;}
+    public void setAuthor(Long userId) {
+        this.userId = userId;
     }
 
     public String getLink() {
