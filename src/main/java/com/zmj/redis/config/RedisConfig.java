@@ -1,17 +1,31 @@
 package com.zmj.redis.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.DefaultLettucePool;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePool;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 /**
  * description:
@@ -40,23 +54,23 @@ public class RedisConfig {
     private int minIdle;
     @Value("${spring.data.redis.lettuce.pool.max-wait}")
     private int maxWait;
-   // @Value("${spring.data.redis.blockWhenExhausted}")
+    // @Value("${spring.data.redis.blockWhenExhausted}")
     private boolean isBlockWhenExhausted = true;
 
-   // @Value("${spring.data.redis.testOnBorrow}")
+    // @Value("${spring.data.redis.testOnBorrow}")
     private boolean isTestOnBorrow = true;
-   // @Value("${spring.data.redis.testOnReturn}")
+    // @Value("${spring.data.redis.testOnReturn}")
     private boolean isTestOnReturn = true;
-   // @Value("${spring.data.redis.testWhileIdle}")
+    // @Value("${spring.data.redis.testWhileIdle}")
     private boolean isTestWhileIdle = true;
-  //  @Value("${spring.data.redis.timeBetweenEvictionRunsMillis}")
+    //  @Value("${spring.data.redis.timeBetweenEvictionRunsMillis}")
     private int timeBetweenEvictionRunsMillis = 30000;
-   // @Value("${spring.data.redis.minEvictableIdleTimeMillis}")
+    // @Value("${spring.data.redis.minEvictableIdleTimeMillis}")
     private int minEvictableIdleTimeMillis = 180000;
 
 
     @Bean
-    public StringRedisSerializer getStringRedisSerializer(){
+    public StringRedisSerializer getStringRedisSerializer() {
         return new StringRedisSerializer();
     }
 
@@ -121,14 +135,28 @@ public class RedisConfig {
     }
 
     @Bean(name = "redisTemplate")
-    public RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory factory, StringRedisSerializer stringRedisSerializer) {
+    public RedisTemplate<String, Object> getRedisTemplate(LettuceConnectionFactory factory, StringRedisSerializer stringRedisSerializer) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         //对key采用String的序列化方式--统一
         redisTemplate.setKeySerializer(stringRedisSerializer);
+        redisTemplate.setHashKeySerializer(stringRedisSerializer);
         //事务支持
         redisTemplate.setEnableTransactionSupport(true);
         redisTemplate.setConnectionFactory(factory);
+        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer());
+        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer());
         return redisTemplate;
+    }
+
+
+    private Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer(){
+        Jackson2JsonRedisSerializer<Object> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        jsonRedisSerializer.setObjectMapper(objectMapper);
+        return jsonRedisSerializer;
     }
 
     @Bean(name = "stringRedisTemplate")
@@ -141,13 +169,18 @@ public class RedisConfig {
         stringRedisTemplate.setConnectionFactory(factory);
         return stringRedisTemplate;
     }
-//
-//    /**
-//     * 缓存管理器 使用redisTemplate操作
-//     */
-//    @Bean
-//    public RedisCacheManager getRedisCacheManager(RedisTemplate<String, Object> redisTemplate){
-//        return new RedisCacheManager(redisTemplate);
-//    }
+
+
+    /**
+     * 缓存管理器 使用redisTemplate操作
+     */
+    @Bean
+    public RedisCacheManager redisCacheManager(LettuceConnectionFactory redisConnectionFactory) {
+        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory);
+        RedisSerializationContext.SerializationPair<Object> pair = RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer());
+        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(pair).entryTtl(Duration.ofSeconds(10));
+        return new RedisCacheManager(redisCacheWriter, defaultCacheConfig);
+    }
 }
 

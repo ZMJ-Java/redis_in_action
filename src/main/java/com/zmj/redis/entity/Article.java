@@ -7,6 +7,15 @@ import java.io.Serializable;
  */
 public class Article implements Serializable {
     /**
+     * votes hashKey
+     */
+    public static final String ARTICLE_VOTES = "votes";
+    /**
+     * scores hashKey
+     */
+    public static final String ARTICLE_SCORES = "scores";
+
+    /**
      * 热点文章最少的投票数量
      */
     public static final Long HOT_ARTICLE_VOTES_NUMS = 200L;
@@ -79,7 +88,10 @@ public class Article implements Serializable {
         this.title = title;
     }
 
-    public Long getAuthor() {return userId;}
+    public Long getAuthor() {
+        return userId;
+    }
+
     public void setAuthor(Long userId) {
         this.userId = userId;
     }
