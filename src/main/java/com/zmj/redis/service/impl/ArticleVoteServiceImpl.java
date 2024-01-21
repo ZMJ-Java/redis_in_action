@@ -1,6 +1,5 @@
 package com.zmj.redis.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.entity.Article;
 import com.zmj.redis.entity.User;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 
 /**
  * @author 14864

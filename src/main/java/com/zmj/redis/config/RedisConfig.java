@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.lettuce.core.ClientOptions;
+import io.lettuce.core.protocol.ProtocolVersion;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,9 +15,8 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.DefaultLettucePool;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettucePool;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -110,11 +111,23 @@ public class RedisConfig {
      * @return DefaultLettucePool
      */
     @Bean
-    public DefaultLettucePool getDefaultLettucePool(GenericObjectPoolConfig poolConfig) {
-        DefaultLettucePool defaultLettucePool = new DefaultLettucePool(hostname, port, poolConfig);
-        defaultLettucePool.setPassword(password);
-        defaultLettucePool.afterPropertiesSet();
-        return defaultLettucePool;
+    public LettuceClientConfiguration getDefaultLettucePool(GenericObjectPoolConfig poolConfig) {
+        return LettucePoolingClientConfiguration.builder()
+                /*官方文档介绍lettuce6.0需要匹配redis6，其中握手协议同时支持resp2/3,6.0以下低版本的redis需要使用resp2*/
+                .clientOptions(ClientOptions.builder().protocolVersion(ProtocolVersion.RESP2).build())
+                .poolConfig(poolConfig)
+                .build();
+    }
+
+    /**
+     * RedisStandalone redis单机配置
+     */
+    @Bean
+    public RedisStandaloneConfiguration redisSentinelConfiguration() {
+        RedisStandaloneConfiguration redisStandaloneConfiguration
+                = new RedisStandaloneConfiguration(hostname, port);
+        redisStandaloneConfiguration.setDatabase(dbIndex);
+        return redisStandaloneConfiguration;
     }
 
     /**
@@ -123,13 +136,15 @@ public class RedisConfig {
      * @return LettuceConnectionFactory implement RedisConnectionFactory
      */
     @Bean
-    public LettuceConnectionFactory getLettuceConnectionFactory(LettucePool pool) {
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(pool);
+    public LettuceConnectionFactory getLettuceConnectionFactory(
+            RedisStandaloneConfiguration redisStandaloneConfiguration,
+            LettuceClientConfiguration poolConfig) {
+        LettuceConnectionFactory factory
+                = new LettuceConnectionFactory(redisStandaloneConfiguration, poolConfig);
         //校验连接是否有效
         factory.setValidateConnection(true);
         //选择数据库
         factory.setDatabase(dbIndex);
-        factory.setTimeout(maxWait);
         factory.afterPropertiesSet();
         return factory;
     }
@@ -149,11 +164,11 @@ public class RedisConfig {
     }
 
 
-    private Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer(){
+    private Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer() {
         Jackson2JsonRedisSerializer<Object> jsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         jsonRedisSerializer.setObjectMapper(objectMapper);
         return jsonRedisSerializer;
