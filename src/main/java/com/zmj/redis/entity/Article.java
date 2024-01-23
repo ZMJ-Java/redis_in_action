@@ -44,6 +44,11 @@ public class Article implements Serializable {
     public static final String ARTICLE_PUBLISH_SCORE_KEY_PREFIX = "article:publish:score:";
 
     /**
+     * 文章分组集合 redis key前缀
+     */
+    public static final String ARTICLE_TYPE_GROUP_KEY_PREFIX = "article:group:";
+
+    /**
      * 文章id
      */
     private Long id;
@@ -71,6 +76,10 @@ public class Article implements Serializable {
      * 文章分数
      */
     private Long scores;
+    /**
+     * 文章类别
+     */
+    private String articleType;
 
     public Long getId() {
         return id;
@@ -88,11 +97,11 @@ public class Article implements Serializable {
         this.title = title;
     }
 
-    public Long getAuthor() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setAuthor(Long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -128,6 +137,14 @@ public class Article implements Serializable {
         this.scores = scores;
     }
 
+    public String getArticleType() {
+        return articleType;
+    }
+
+    public void setArticleType(String articleType) {
+        this.articleType = articleType;
+    }
+
     /**
      * 获取文章信息 缓存key
      */
@@ -154,5 +171,17 @@ public class Article implements Serializable {
      */
     public static String getArticlePublishScoreKey(Article article) {
         return Article.ARTICLE_PUBLISH_SCORE_KEY_PREFIX + article.getId();
+    }
+
+    /**
+     * 获取文章分组集合 缓存key
+     */
+    public static String getArticleTypeGroupKey(Article article) {
+        String articleType = article.getArticleType();
+
+        Long groupId = ArticleClass.ARTICLE_CLASS_MAP.get(articleType);
+
+        return Article.ARTICLE_TYPE_GROUP_KEY_PREFIX + groupId;
+
     }
 }

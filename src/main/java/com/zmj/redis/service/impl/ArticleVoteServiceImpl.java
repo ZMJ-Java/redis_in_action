@@ -27,7 +27,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     @Override
     public Boolean canVote(Long userId, Article article) {
         //先判断投票人是否是作者本人
-        Boolean isAuthor = userId.equals(article.getAuthor());
+        Boolean isAuthor = userId.equals(article.getUserId());
         if (Boolean.TRUE.equals(isAuthor)) {
             log.info("该用户[{}]是文章[{}]作者,无法投票", userId, article.getId());
             return false;
@@ -40,7 +40,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             return false;
         }
         //判断文章是否还存在
-        String authorKey = User.getUserArticleSetKey(article.getAuthor());
+        String authorKey = User.getUserArticleSetKey(article.getUserId());
         Boolean isExist = redisTemplate.opsForSet().isMember(authorKey, article.getId());
         if (Boolean.FALSE.equals(isExist)) {
             log.info("文章[{}]已失效或不存在,该用户[{}]无法投票", article.getId(), userId);
@@ -72,7 +72,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             //计算文章分数
             redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_SCORES, Article.SCORE_PER_VOTE);
             //增加文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getAuthor(), Article.SCORE_PER_VOTE);
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getUserId(), Article.SCORE_PER_VOTE);
         }
 
         return AjaxResult.success("投票成功");
@@ -81,7 +81,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     @Override
     public AjaxResult cancelVote(Long userId, Article article) {
         //判断是否是作者本人
-        Boolean isAuthor = userId.equals(article.getAuthor());
+        Boolean isAuthor = userId.equals(article.getUserId());
         if (Boolean.TRUE.equals(isAuthor)) {
             log.info("该用户[{}]是文章[{}]作者,无法投票", userId, article.getId());
             return AjaxResult.error("您是作者，无法取消投票");
@@ -105,7 +105,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_VOTES, -1L);
             redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_SCORES, -1L * Article.SCORE_PER_VOTE);
             //减少文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getAuthor(), -1L * Article.SCORE_PER_VOTE);
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getUserId(), -1L * Article.SCORE_PER_VOTE);
         }
         return AjaxResult.success("取消投票成功");
     }
