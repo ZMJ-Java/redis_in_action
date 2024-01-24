@@ -46,6 +46,12 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             log.info("文章[{}]已失效或不存在,该用户[{}]无法投票", article.getId(), userId);
             return false;
         }
+        //判断文章是否截止投票
+        String articlePublishTimeKey = Article.getArticlePublishTimeKey();
+        Double articlePublishTime= redisTemplate.opsForZSet().score(articlePublishTimeKey, article.getId());
+        if (Article.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime){
+            return false;
+        }
         return true;
     }
 
@@ -59,7 +65,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         }
         String articleVotedSetKey = Article.getArticleVotedSetKey(article);
         String userVotedArticleSetKey = User.getUserArticleSetKey(userId);
-        String articleScoreQueueKey = Article.getArticlePublishScoreKey(article);
+        String articleScoreQueueKey = Article.getArticlePublishScoreKey();
         //可以投票
         //将投票用户ID加入到文章投票集合
         redisTemplate.opsForSet().add(articleVotedSetKey, userId);
@@ -72,7 +78,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             //计算文章分数
             redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_SCORES, Article.SCORE_PER_VOTE);
             //增加文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getUserId(), Article.SCORE_PER_VOTE);
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), Article.SCORE_PER_VOTE);
         }
 
         return AjaxResult.success("投票成功");
@@ -95,7 +101,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         //取消投票
         String articleInfoKey = Article.getArticleInfoHashKey(article);
         String userVotedArticleKey = User.getUserArticleSetKey(userId);
-        String articleScoreQueueKey = Article.getArticlePublishScoreKey(article);
+        String articleScoreQueueKey = Article.getArticlePublishScoreKey();
         //移除用户已投票文章集合中文章
         redisTemplate.opsForSet().remove(userVotedArticleKey, article.getId());
         //移除文章投票的用户集合中的用户
@@ -105,7 +111,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_VOTES, -1L);
             redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_SCORES, -1L * Article.SCORE_PER_VOTE);
             //减少文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getUserId(), -1L * Article.SCORE_PER_VOTE);
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), -1L * Article.SCORE_PER_VOTE);
         }
         return AjaxResult.success("取消投票成功");
     }

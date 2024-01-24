@@ -14,33 +14,33 @@ public enum ArticleClass implements Serializable {
     /**
      * 编程
      */
-    PROGRAMMING("programming", 1000L),
+    PROGRAMMING(1000L, "programming"),
     /**
      * 儿童
      */
-    CHILDREN("children", 1001L),
+    CHILDREN(1001L, "children"),
     /**
      * 技术
      */
-    TECHNOLOGY("technology", 1002L),
+    TECHNOLOGY(1002L, "technology"),
     /**
      * 科学
      */
-    SCIENCE("science", 1003L);
+    SCIENCE(1003L, "science");
 
     private String articleType;
 
     private Long groupId;
 
-    public static final Map<String, Long> ARTICLE_CLASS_MAP = new HashMap<>();
+    public static final Map<Long,String> ARTICLE_CLASS_MAP = new HashMap<>();
 
     static {
         for (ArticleClass value : ArticleClass.values()) {
-            ARTICLE_CLASS_MAP.put(value.getArticleType(), value.getGroupId());
+            ARTICLE_CLASS_MAP.put(value.getGroupId(),value.getArticleType());
         }
     }
 
-    private ArticleClass(String articleType, Long groupId) {
+    private ArticleClass( Long groupId,String articleType) {
         this.articleType = articleType;
         this.groupId = groupId;
     }

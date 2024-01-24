@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.protocol.ProtocolVersion;
+import io.lettuce.core.resource.DefaultClientResources;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +22,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
@@ -37,7 +34,7 @@ import java.time.Duration;
  * @author wkGui
  */
 @Configuration
-public class RedisConfig {
+public class RedisConfig{
 
     @Value("${spring.data.redis.host}")
     private String hostname;
@@ -115,6 +112,8 @@ public class RedisConfig {
         return LettucePoolingClientConfiguration.builder()
                 /*官方文档介绍lettuce6.0需要匹配redis6，其中握手协议同时支持resp2/3,6.0以下低版本的redis需要使用resp2*/
                 .clientOptions(ClientOptions.builder().protocolVersion(ProtocolVersion.RESP2).build())
+                .clientResources(DefaultClientResources.create())
+                .commandTimeout(Duration.ofSeconds(10))
                 .poolConfig(poolConfig)
                 .build();
     }
