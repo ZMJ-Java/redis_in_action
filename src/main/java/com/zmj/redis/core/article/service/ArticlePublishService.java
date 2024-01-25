@@ -4,7 +4,7 @@ import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.core.article.domain.Article;
 
 /**
- * @author 14864
+ * @author zmj
  */
 public interface ArticlePublishService {
 

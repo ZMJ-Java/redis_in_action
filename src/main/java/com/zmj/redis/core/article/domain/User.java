@@ -3,7 +3,7 @@ package com.zmj.redis.core.article.domain;
 import java.io.Serializable;
 
 /**
- * @author 14864
+ * @author zmj
  */
 public class User implements Serializable {
 

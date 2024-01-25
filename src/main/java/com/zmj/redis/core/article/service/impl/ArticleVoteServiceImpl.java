@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 
 /**
- * @author 14864
+ * @author zmj
  */
 @Service
 public class ArticleVoteServiceImpl implements ArticleVoteService {

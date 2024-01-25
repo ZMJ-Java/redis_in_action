@@ -1,7 +1,7 @@
 package com.zmj.redis.core.article.domain;
 
 /**
- * @author 14864
+ * @author zmj
  * @apiNote 文章分组对象
  * @date 2024/1/23 20:59
  */

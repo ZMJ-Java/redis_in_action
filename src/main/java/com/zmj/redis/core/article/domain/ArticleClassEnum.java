@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author 14864
+ * @author zmj
  * @apiNote 文章类型枚举
  * @date 2024/1/23 21:20
  */
-public enum ArticleClass implements Serializable {
+public enum ArticleClassEnum implements Serializable {
 
     /**
      * 编程
@@ -35,12 +35,12 @@ public enum ArticleClass implements Serializable {
     public static final Map<Long,String> ARTICLE_CLASS_MAP = new HashMap<>();
 
     static {
-        for (ArticleClass value : ArticleClass.values()) {
-            ARTICLE_CLASS_MAP.put(value.getGroupId(),value.getArticleType());
+        for (ArticleClassEnum value : ArticleClassEnum.values()) {
+            ARTICLE_CLASS_MAP.put(value.getGroupId(), value.getArticleType());
         }
     }
 
-    private ArticleClass( Long groupId,String articleType) {
+    private ArticleClassEnum(Long groupId, String articleType) {
         this.articleType = articleType;
         this.groupId = groupId;
     }

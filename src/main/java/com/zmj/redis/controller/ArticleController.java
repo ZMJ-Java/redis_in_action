@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @author 14864
+ * @author zmj
  * @apiNote 文章投票controller
  * @date 2024/1/20 13:34
  */
