@@ -1,4 +1,4 @@
-package com.zmj.redis.entity;
+package com.zmj.redis.core.article.domain;
 
 /**
  * @author 14864

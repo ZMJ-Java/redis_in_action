@@ -1,8 +1,8 @@
-package com.zmj.redis.service.impl;
+package com.zmj.redis.core.article.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zmj.redis.entity.Article;
-import com.zmj.redis.service.ArticleGroupService;
+import com.zmj.redis.core.article.service.ArticleGroupService;
+import com.zmj.redis.core.article.domain.Article;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author 14864

@@ -1,8 +1,7 @@
-package com.zmj.redis.service;
+package com.zmj.redis.core.article.service;
 
 import com.zmj.redis.common.AjaxResult;
-import com.zmj.redis.entity.Article;
-import com.zmj.redis.entity.User;
+import com.zmj.redis.core.article.domain.Article;
 
 /**
  * @author 14864

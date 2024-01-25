@@ -1,6 +1,6 @@
-package com.zmj.redis.service;
+package com.zmj.redis.core.article.service;
 
-import com.zmj.redis.entity.Article;
+import com.zmj.redis.core.article.domain.Article;
 
 import java.util.List;
 

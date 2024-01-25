@@ -1,10 +1,10 @@
 package com.zmj.redis.controller;
 
 import com.zmj.redis.common.AjaxResult;
-import com.zmj.redis.entity.Article;
-import com.zmj.redis.service.ArticleGroupService;
-import com.zmj.redis.service.ArticlePublishService;
-import com.zmj.redis.service.ArticleVoteService;
+import com.zmj.redis.core.article.domain.Article;
+import com.zmj.redis.core.article.service.ArticleGroupService;
+import com.zmj.redis.core.article.service.ArticlePublishService;
+import com.zmj.redis.core.article.service.ArticleVoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

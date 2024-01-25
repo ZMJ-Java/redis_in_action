@@ -1,13 +1,12 @@
-package com.zmj.redis.service.impl;
+package com.zmj.redis.core.article.service.impl;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.BeanUtil;
+import com.zmj.redis.core.article.service.ArticleGroupService;
+import com.zmj.redis.core.article.service.ArticlePublishService;
 import com.zmj.redis.common.AjaxResult;
-import com.zmj.redis.entity.Article;
-import com.zmj.redis.entity.User;
-import com.zmj.redis.service.ArticleGroupService;
-import com.zmj.redis.service.ArticlePublishService;
+import com.zmj.redis.core.article.domain.Article;
+import com.zmj.redis.core.article.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
