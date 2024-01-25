@@ -61,7 +61,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
         String key = Article.getArticlePublishScoreKey();
         //按7天之内的文章分数排序,取numberOfArticles个文章
         long now = Long.MAX_VALUE;
-        long from = System.currentTimeMillis() - Article.ARTICLE_VOTES_CUTOFF_TIME;
+        long from = 0;
         //拿到文章ID集合
         Set<Object> articleIds = redisTemplate.opsForZSet().rangeByScore(key, from, now, 0, numberOfArticles);
         //创建文章列表
