@@ -27,10 +27,19 @@ public interface ArticleGroupService {
 
 
     /**
-     * 文章分页,取出分数前numberOfArticles的文章Id
+     * 文章分页,取出分数前nums的文章Id
      *
-     * @param numberOfArticles 文章数量
+     * @param nums 文章数量
+     * @param pages 文章页数
      * @return 文章列表
      */
-    List<Article> getTopScoresArticleId(Long numberOfArticles);
+    List<Article> getTopScoresArticles(Long nums,Long pages);
+
+    /**文章分页,取出发布时间前nums的文章Id
+     *
+     * @param nums 文章数量
+     * @pagram pages 文章页数
+     * @return 文章列表
+     */
+    List<Article> getLastArticles(Long nums,Long pages);
 }

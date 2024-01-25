@@ -52,9 +52,17 @@ public class ArticleController {
         return articleVoteService.cancelVote(userId, article);
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "/getTopArticles/{nums}")
-    public AjaxResult getTopArticles(@PathVariable("nums") Long nums){
-        List<Article> topScoresArticle = articleGroupService.getTopScoresArticleId(nums);
+    @RequestMapping(method = RequestMethod.GET, value = "/getTopArticles/{nums}/{pages}")
+    public AjaxResult getTopArticles(@PathVariable("nums") Long nums ,
+                                     @PathVariable("pages") Long pages) {
+        List<Article> topScoresArticle = articleGroupService.getTopScoresArticles(nums,pages);
         return AjaxResult.success(topScoresArticle);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/getLastArticles/{nums}/{pages}")
+    public AjaxResult getLastArticles(@PathVariable("nums") Long nums ,
+                                      @PathVariable("pages") Long pages) {
+        List<Article> lastScoresArticle = articleGroupService.getLastArticles(nums,pages);
+        return AjaxResult.success(lastScoresArticle);
     }
 }
