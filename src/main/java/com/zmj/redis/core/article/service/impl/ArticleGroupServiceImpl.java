@@ -67,6 +67,9 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
         //创建文章列表
         List<Article> articles = new ArrayList<>();
         final ObjectMapper objectMapper = new ObjectMapper();
+        if (null == articleIds || articleIds.isEmpty()){
+            throw new NullPointerException("articleIds is null");
+        }
         for (Object articleId : articleIds) {
             Article article = new Article();
             article.setId(((Integer) articleId).longValue());

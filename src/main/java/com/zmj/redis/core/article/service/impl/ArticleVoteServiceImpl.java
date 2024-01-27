@@ -1,5 +1,6 @@
 package com.zmj.redis.core.article.service.impl;
 
+import com.zmj.redis.core.article.domain.ArticleConstant;
 import com.zmj.redis.core.article.service.ArticleVoteService;
 import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.core.article.domain.Article;
@@ -49,7 +50,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         //判断文章是否截止投票
         String articlePublishTimeKey = Article.getArticlePublishTimeKey();
         Double articlePublishTime= redisTemplate.opsForZSet().score(articlePublishTimeKey, article.getId());
-        if (Article.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime){
+        if (ArticleConstant.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime){
             return false;
         }
         return true;
@@ -74,11 +75,11 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
 
         synchronized (Article.class) {
             //文章投票数量
-            redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_VOTES, 1L);
+            redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_VOTES, 1L);
             //计算文章分数
-            redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_SCORES, Article.SCORE_PER_VOTE);
+            redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_SCORES, ArticleConstant.SCORE_PER_VOTE);
             //增加文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), Article.SCORE_PER_VOTE);
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), ArticleConstant.SCORE_PER_VOTE);
         }
 
         return AjaxResult.success("投票成功");
@@ -108,10 +109,10 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         redisTemplate.opsForSet().remove(articleVotedQueueId, userId);
         synchronized (Article.class) {
             //将文章信息中的投票数量减1,分数减1 * SCORE_PER_VOTE
-            redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_VOTES, -1L);
-            redisTemplate.opsForHash().increment(articleInfoKey, Article.ARTICLE_SCORES, -1L * Article.SCORE_PER_VOTE);
+            redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_VOTES, -1L);
+            redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_SCORES, -1L * ArticleConstant.SCORE_PER_VOTE);
             //减少文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), -1L * Article.SCORE_PER_VOTE);
+            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), -1L * ArticleConstant.SCORE_PER_VOTE);
         }
         return AjaxResult.success("取消投票成功");
     }
