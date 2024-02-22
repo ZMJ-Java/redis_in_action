@@ -4,7 +4,7 @@ import com.zmj.redis.core.article.domain.ArticleConstant;
 import com.zmj.redis.core.article.service.ArticleVoteService;
 import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.core.article.domain.Article;
-import com.zmj.redis.core.article.domain.User;
+import com.zmj.redis.core.user.UserConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,21 +34,21 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             return false;
         }
         //不是作者本人，在判断是否已经投过票
-        String articleVotedSetId = Article.getArticleVotedSetKey(article);
+        String articleVotedSetId = ArticleConstant.getArticleVotedSetKey(article);
         Boolean hasVote = redisTemplate.opsForSet().isMember(articleVotedSetId, userId);
         if (Boolean.TRUE.equals(hasVote)) {
             log.info("该用户[{}]对文章[{}]投过票,无法再次投票", userId, article.getId());
             return false;
         }
         //判断文章是否还存在
-        String authorKey = User.getUserArticleSetKey(article.getUserId());
+        String authorKey = UserConstant.getUserArticleSetKey(article.getUserId());
         Boolean isExist = redisTemplate.opsForSet().isMember(authorKey, article.getId());
         if (Boolean.FALSE.equals(isExist)) {
             log.info("文章[{}]已失效或不存在,该用户[{}]无法投票", article.getId(), userId);
             return false;
         }
         //判断文章是否截止投票
-        String articlePublishTimeKey = Article.getArticlePublishTimeKey();
+        String articlePublishTimeKey = ArticleConstant.getArticlePublishTimeKey();
         Double articlePublishTime= redisTemplate.opsForZSet().score(articlePublishTimeKey, article.getId());
         if (ArticleConstant.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime){
             return false;
@@ -60,13 +60,13 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     public AjaxResult voteArticle(Long userId, Article article) {
         //先判断可不可以投票
         Boolean canVote = canVote(userId, article);
-        String articleInfoKey = Article.getArticleInfoHashKey(article);
+        String articleInfoKey = ArticleConstant.getArticleInfoHashKey(article);
         if (!canVote) {
             return AjaxResult.error("您不可投票");
         }
-        String articleVotedSetKey = Article.getArticleVotedSetKey(article);
-        String userVotedArticleSetKey = User.getUserArticleSetKey(userId);
-        String articleScoreQueueKey = Article.getArticlePublishScoreKey();
+        String articleVotedSetKey = ArticleConstant.getArticleVotedSetKey(article);
+        String userVotedArticleSetKey = UserConstant.getUserArticleSetKey(userId);
+        String articleScoreQueueKey = ArticleConstant.getArticlePublishScoreKey();
         //可以投票
         //将投票用户ID加入到文章投票集合
         redisTemplate.opsForSet().add(articleVotedSetKey, userId);
@@ -94,15 +94,15 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
             return AjaxResult.error("您是作者，无法取消投票");
         }
         //判断是否投过票
-        String articleVotedQueueId = Article.getArticleVotedSetKey(article);
+        String articleVotedQueueId = ArticleConstant.getArticleVotedSetKey(article);
         Boolean hasVote = redisTemplate.opsForSet().isMember(articleVotedQueueId, userId);
         if (Boolean.FALSE.equals(hasVote)) {
             return AjaxResult.error("您未投票，无法取消投票");
         }
         //取消投票
-        String articleInfoKey = Article.getArticleInfoHashKey(article);
-        String userVotedArticleKey = User.getUserArticleSetKey(userId);
-        String articleScoreQueueKey = Article.getArticlePublishScoreKey();
+        String articleInfoKey = ArticleConstant.getArticleInfoHashKey(article);
+        String userVotedArticleKey = UserConstant.getUserArticleSetKey(userId);
+        String articleScoreQueueKey = ArticleConstant.getArticlePublishScoreKey();
         //移除用户已投票文章集合中文章
         redisTemplate.opsForSet().remove(userVotedArticleKey, article.getId());
         //移除文章投票的用户集合中的用户

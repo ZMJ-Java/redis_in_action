@@ -2,11 +2,12 @@ package com.zmj.redis.core.article.service.impl;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zmj.redis.core.article.domain.ArticleConstant;
 import com.zmj.redis.core.article.service.ArticleGroupService;
 import com.zmj.redis.core.article.service.ArticlePublishService;
 import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.core.article.domain.Article;
-import com.zmj.redis.core.article.domain.User;
+import com.zmj.redis.core.user.UserConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,11 @@ public class ArticlePublishServiceImpl implements ArticlePublishService {
     @Override
     public AjaxResult articlePublish(Article article) {
         long publishTime = System.currentTimeMillis();
-        String articleTimeQueueKey = Article.getArticlePublishTimeKey();
-        String articleVotedKey = Article.getArticleVotedSetKey(article);
-        String articleScoreQueueKey = Article.getArticlePublishScoreKey();
-        String articleInfoKey = Article.getArticleInfoHashKey(article);
-        String userArticleSetKey = User.getUserArticleSetKey(article.getUserId());
+        String articleTimeQueueKey = ArticleConstant.getArticlePublishTimeKey();
+        String articleVotedKey = ArticleConstant.getArticleVotedSetKey(article);
+        String articleScoreQueueKey = ArticleConstant.getArticlePublishScoreKey();
+        String articleInfoKey = ArticleConstant.getArticleInfoHashKey(article);
+        String userArticleSetKey = UserConstant.getUserArticleSetKey(article.getUserId());
         HashMap articleInfoMap = new ObjectMapper().convertValue(article, HashMap.class);
         //存储文章信息
         redisTemplate.opsForHash().putAll(articleInfoKey,articleInfoMap);

@@ -1,4 +1,4 @@
-package com.zmj.redis.core.article.domain;
+package com.zmj.redis.core.user;
 
 import java.io.Serializable;
 
@@ -6,8 +6,6 @@ import java.io.Serializable;
  * @author zmj
  */
 public class User implements Serializable {
-
-    public static final String USER_ARTICLE_SET_KEY_PREFIX = "user:article:";
 
     /**
      * 用户id
@@ -17,6 +15,11 @@ public class User implements Serializable {
      * 用户名
      */
     private String name;
+    /**
+     * 密码
+     */
+    private String password;
+
 
     public Long getId() {
         return id;
@@ -34,8 +37,13 @@ public class User implements Serializable {
         this.name = name;
     }
 
-    public static String getUserArticleSetKey(Long userId){
-       return User.USER_ARTICLE_SET_KEY_PREFIX + userId;
+    public String getPassword() {
+        return password;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package com.zmj.redis.core.article.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zmj.redis.core.article.domain.ArticleConstant;
 import com.zmj.redis.core.article.service.ArticleGroupService;
 import com.zmj.redis.core.article.domain.Article;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
     @Override
     public void putArticleToGroup(Article article, Long publishTime) {
         //获取缓存key
-        String articleTypeGroupKey = Article.getArticleTypeGroupKey(article);
+        String articleTypeGroupKey = ArticleConstant.getArticleTypeGroupKey(article);
         try {
             redisTemplate.opsForZSet().add(articleTypeGroupKey, article.getId(), publishTime);
         } catch (Exception e) {
@@ -46,7 +47,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
     @Override
     public void removeArticleFromGroup(Article article) {
         //获取缓存key
-        String articleTypeGroupKey = Article.getArticleTypeGroupKey(article);
+        String articleTypeGroupKey = ArticleConstant.getArticleTypeGroupKey(article);
         try {
             redisTemplate.opsForZSet().remove(articleTypeGroupKey, article.getId());
         } catch (Exception e) {
@@ -57,7 +58,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
     @Override
     public List<Article> getTopScoresArticles(Long numberOfArticles, Long pages) {
         //获取key
-        String key = Article.getArticlePublishScoreKey();
+        String key = ArticleConstant.getArticlePublishScoreKey();
         //按7天之内的文章分数排序,取numberOfArticles个文章
         long offset = (pages - 1) * numberOfArticles;
         long now = Long.MAX_VALUE;
@@ -74,19 +75,18 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
             Article article = new Article();
             article.setId(((Integer) articleId).longValue());
             //文章对象属性map
-            Map<Object, Object> articleInfoMap = redisTemplate.opsForHash().entries(Article.getArticleInfoHashKey(article));
+            Map<Object, Object> articleInfoMap = redisTemplate.opsForHash().entries(ArticleConstant.getArticleInfoHashKey(article));
             //转为对象
             article = objectMapper.convertValue(articleInfoMap, Article.class);
             articles.add(article);
         }
-        System.out.println(articles);
         return articles;
     }
 
     @Override
     public List<Article> getLastArticles(Long numberOfArticles, Long pages) {
         //获取key
-        String key = Article.getArticlePublishTimeKey();
+        String key = ArticleConstant.getArticlePublishTimeKey();
         //按7天之内的文章分数排序,取numberOfArticles个文章
         long offset = (pages - 1) * numberOfArticles;
         long now = Long.MAX_VALUE;
@@ -100,12 +100,11 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
             Article article = new Article();
             article.setId(((Integer) articleId).longValue());
             //文章对象属性map
-            Map<Object, Object> articleInfoMap = redisTemplate.opsForHash().entries(Article.getArticleInfoHashKey(article));
+            Map<Object, Object> articleInfoMap = redisTemplate.opsForHash().entries(ArticleConstant.getArticleInfoHashKey(article));
             //转为对象
             article = objectMapper.convertValue(articleInfoMap, Article.class);
             articles.add(article);
         }
-        System.out.println(articles);
         return articles;
     }
 

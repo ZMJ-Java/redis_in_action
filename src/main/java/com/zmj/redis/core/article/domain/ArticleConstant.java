@@ -53,4 +53,42 @@ public class ArticleConstant {
     public static final String ARTICLE_TYPE_GROUP_KEY_PREFIX = "article:group:";
 
 
+    /**
+     * 获取文章信息 缓存key
+     */
+    public static String getArticleInfoHashKey(Article article) {
+        return ArticleConstant.ARTICLE_INFO_HASH_KEY_PREFIX + article.getId();
+    }
+
+    /**
+     * 获取文章投票用户集合 缓存key
+     */
+    public static String getArticleVotedSetKey(Article article) {
+        return ArticleConstant.ARTICLE_VOTED_SET_KEY_PREFIX + article.getId();
+    }
+
+    /**
+     * 获取文章发布时间有序集合 缓存key
+     */
+    public static String getArticlePublishTimeKey() {
+        return ArticleConstant.ARTICLE_PUBLISH_TIME_KEY;
+    }
+
+    /**
+     * 获取文章发布分数有序集合 缓存key
+     */
+    public static String getArticlePublishScoreKey() {
+        return ArticleConstant.ARTICLE_PUBLISH_SCORE_KEY;
+    }
+
+    /**
+     * 获取文章分组集合 缓存key
+     */
+    public static String getArticleTypeGroupKey(Article article) {
+        String articleType = article.getArticleType();
+        return ArticleConstant.ARTICLE_TYPE_GROUP_KEY_PREFIX + articleType;
+
+    }
+
+
 }
