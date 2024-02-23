@@ -49,11 +49,11 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         }
         //判断文章是否截止投票
         String articlePublishTimeKey = ArticleConstant.getArticlePublishTimeKey();
-        Double articlePublishTime= redisTemplate.opsForZSet().score(articlePublishTimeKey, article.getId());
-        if (ArticleConstant.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime){
-            return false;
+        Double articlePublishTime = redisTemplate.opsForZSet().score(articlePublishTimeKey, article.getId());
+        if (null == articlePublishTime){
+            articlePublishTime = 0D;
         }
-        return true;
+        return !(ArticleConstant.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime);
     }
 
     @Override
