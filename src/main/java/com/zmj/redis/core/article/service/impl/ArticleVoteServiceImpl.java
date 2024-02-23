@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -57,6 +58,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     }
 
     @Override
+    @Transactional
     public AjaxResult voteArticle(Long userId, Article article) {
         //先判断可不可以投票
         Boolean canVote = canVote(userId, article);
@@ -86,6 +88,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
     }
 
     @Override
+    @Transactional
     public AjaxResult cancelVote(Long userId, Article article) {
         //判断是否是作者本人
         Boolean isAuthor = userId.equals(article.getUserId());
