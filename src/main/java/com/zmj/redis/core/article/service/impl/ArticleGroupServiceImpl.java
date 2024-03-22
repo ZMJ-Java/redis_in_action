@@ -23,8 +23,8 @@ import java.util.Set;
 @Service
 public class ArticleGroupServiceImpl implements ArticleGroupService {
 
-    public static final Logger logger = LoggerFactory.getLogger(ArticleGroupServiceImpl.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(ArticleGroupServiceImpl.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
@@ -36,7 +36,8 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
     public void putArticleToGroup(Article article, Long publishTime) {
         //获取缓存key
         String articleTypeGroupKey = ArticleConstant.getArticleTypeGroupKey(article);
-        try {
+        try
+        {
             redisTemplate.opsForZSet().add(articleTypeGroupKey, article.getId(), publishTime);
         } catch (Exception e) {
             logger.warn("添加文章[{}]发生异常,未能成功添加到有序集合[{}]", article.getId(), articleTypeGroupKey);
@@ -67,7 +68,6 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
         Set<Object> articleIds = redisTemplate.opsForZSet().rangeByScore(key, from, now, offset, numberOfArticles);
         //创建文章列表
         List<Article> articles = new ArrayList<>();
-        final ObjectMapper objectMapper = new ObjectMapper();
         if (null == articleIds || articleIds.isEmpty()){
             throw new NullPointerException("articleIds is null");
         }
@@ -77,7 +77,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
             //文章对象属性map
             Map<Object, Object> articleInfoMap = redisTemplate.opsForHash().entries(ArticleConstant.getArticleInfoHashKey(article));
             //转为对象
-            article = objectMapper.convertValue(articleInfoMap, Article.class);
+            article = OBJECT_MAPPER.convertValue(articleInfoMap, Article.class);
             articles.add(article);
         }
         return articles;
@@ -95,14 +95,13 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
         Set<Object> articleIds = redisTemplate.opsForZSet().rangeByScore(key, from, now, offset, numberOfArticles);
         //创建文章列表
         List<Article> articles = new ArrayList<>();
-        final ObjectMapper objectMapper = new ObjectMapper();
         for (Object articleId : articleIds) {
             Article article = new Article();
             article.setId(((Integer) articleId).longValue());
             //文章对象属性map
             Map<Object, Object> articleInfoMap = redisTemplate.opsForHash().entries(ArticleConstant.getArticleInfoHashKey(article));
             //转为对象
-            article = objectMapper.convertValue(articleInfoMap, Article.class);
+            article = OBJECT_MAPPER.convertValue(articleInfoMap, Article.class);
             articles.add(article);
         }
         return articles;

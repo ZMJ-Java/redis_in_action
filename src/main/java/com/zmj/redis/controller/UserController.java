@@ -1,9 +1,7 @@
 package com.zmj.redis.controller;
 
-import com.sun.istack.internal.NotNull;
 import com.zmj.redis.common.AjaxResult;
 import com.zmj.redis.core.user.User;
-import com.zmj.redis.core.user.UserConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
