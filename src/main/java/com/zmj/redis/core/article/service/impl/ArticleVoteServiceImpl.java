@@ -51,7 +51,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         //判断文章是否截止投票
         String articlePublishTimeKey = ArticleConstant.getArticlePublishTimeKey();
         Double articlePublishTime = redisTemplate.opsForZSet().score(articlePublishTimeKey, article.getId());
-        if (null == articlePublishTime){
+        if (null == articlePublishTime) {
             articlePublishTime = 0D;
         }
         return !(ArticleConstant.ARTICLE_VOTES_CUTOFF_TIME < System.currentTimeMillis() - articlePublishTime);
@@ -89,7 +89,7 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
 
     @Override
     @Transactional
-    public AjaxResult cancelVote(Long userId, Article article) {
+    public AjaxResult cancelVote(Long userId, Article article) throws Exception {
         //判断是否是作者本人
         Boolean isAuthor = userId.equals(article.getUserId());
         if (Boolean.TRUE.equals(isAuthor)) {
@@ -102,21 +102,59 @@ public class ArticleVoteServiceImpl implements ArticleVoteService {
         if (Boolean.FALSE.equals(hasVote)) {
             return AjaxResult.error("您未投票，无法取消投票");
         }
-        //取消投票
-        String articleInfoKey = ArticleConstant.getArticleInfoHashKey(article);
-        String userVotedArticleKey = UserConstant.getUserArticleSetKey(userId);
-        String articleScoreQueueKey = ArticleConstant.getArticlePublishScoreKey();
-        //移除用户已投票文章集合中文章
-        redisTemplate.opsForSet().remove(userVotedArticleKey, article.getId());
-        //移除文章投票的用户集合中的用户
-        redisTemplate.opsForSet().remove(articleVotedQueueId, userId);
-        synchronized (Article.class) {
-            //将文章信息中的投票数量减1,分数减1 * SCORE_PER_VOTE
-            redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_VOTES, -1L);
-            redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_SCORES, -1L * ArticleConstant.SCORE_PER_VOTE);
-            //减少文章分数队列中文章分数
-            redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), -1L * ArticleConstant.SCORE_PER_VOTE);
+        try {
+            //取消投票
+            String articleInfoKey = ArticleConstant.getArticleInfoHashKey(article);
+            String userVotedArticleKey = UserConstant.getUserArticleSetKey(userId);
+            String articleScoreQueueKey = ArticleConstant.getArticlePublishScoreKey();
+            boolean removeVotedUser = removeVotedUser(userVotedArticleKey, article, articleVotedQueueId, userId);
+            if (!removeVotedUser) {
+                return AjaxResult.error("取消投票失败");
+            }
+            boolean reduceArticleScores = reduceArticleScores(articleInfoKey, articleScoreQueueKey, article);
+            if (!reduceArticleScores) {
+                return AjaxResult.error("取消投票失败");
+            }
+        } catch (Exception e) {
+            throw new Exception("取消投票失败");
         }
         return AjaxResult.success("取消投票成功");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean reduceArticleScores(
+            String articleInfoKey,
+            String articleScoreQueueKey,
+            Article article) throws Exception {
+        try {
+            synchronized (Article.class) {
+                //将文章信息中的投票数量减1,分数减1 * SCORE_PER_VOTE
+                redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_VOTES, -1L);
+                redisTemplate.opsForHash().increment(articleInfoKey, ArticleConstant.ARTICLE_SCORES, -1L * ArticleConstant.SCORE_PER_VOTE);
+                //减少文章分数队列中文章分数
+                redisTemplate.opsForZSet().incrementScore(articleScoreQueueKey, article.getId(), -1L * ArticleConstant.SCORE_PER_VOTE);
+            }
+        } catch (Exception e) {
+            throw new Exception("文章分数错误");
+        }
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeVotedUser(
+            String userVotedArticleKey,
+            Article article,
+            String articleVotedQueueId,
+            Long userId) throws Exception {
+        try {
+            //移除用户已投票文章集合中文章
+            redisTemplate.opsForSet().remove(userVotedArticleKey, article.getId());
+            //移除文章投票的用户集合中的用户
+            redisTemplate.opsForSet().remove(articleVotedQueueId, userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

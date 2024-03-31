@@ -63,7 +63,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
         //按7天之内的文章分数排序,取numberOfArticles个文章
         long offset = (pages - 1) * numberOfArticles;
         long now = Long.MAX_VALUE;
-        long from = 0;
+        long from = System.currentTimeMillis();
         //拿到文章ID集合
         Set<Object> articleIds = redisTemplate.opsForZSet().rangeByScore(key, from, now, offset, numberOfArticles);
         //创建文章列表
@@ -90,7 +90,7 @@ public class ArticleGroupServiceImpl implements ArticleGroupService {
         //按7天之内的文章分数排序,取numberOfArticles个文章
         long offset = (pages - 1) * numberOfArticles;
         long now = Long.MAX_VALUE;
-        long from = 0;
+        long from = System.currentTimeMillis();
         //拿到文章ID集合
         Set<Object> articleIds = redisTemplate.opsForZSet().rangeByScore(key, from, now, offset, numberOfArticles);
         //创建文章列表

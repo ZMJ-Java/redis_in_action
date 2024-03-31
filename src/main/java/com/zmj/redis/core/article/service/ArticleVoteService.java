@@ -31,7 +31,7 @@ public interface ArticleVoteService {
      * @param article     文章
      * @param userId      用户ID
      */
-    AjaxResult cancelVote(Long userId, Article article);
+    AjaxResult cancelVote(Long userId, Article article) throws Exception;
 
 
 }

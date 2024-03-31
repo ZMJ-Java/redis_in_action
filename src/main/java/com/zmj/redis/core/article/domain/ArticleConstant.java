@@ -18,15 +18,15 @@ public class ArticleConstant {
     /**
      * 热点文章最少的投票数量
      */
-    public static final Long HOT_ARTICLE_VOTES_NUMS = 200L;
+    public static final long HOT_ARTICLE_VOTES_NUMS = 200L;
     /**
      * 文章投票截止时间
      */
-    public static final Long ARTICLE_VOTES_CUTOFF_TIME = 7 * 24 * 60 * 60L;
+    public static final long ARTICLE_VOTES_CUTOFF_TIME = 7 * 24 * 60 * 60L;
     /**
      * 文章每一票所代表的分数
      */
-    public static final Long SCORE_PER_VOTE = (24 * 60 * 60) / HOT_ARTICLE_VOTES_NUMS;
+    public static final long SCORE_PER_VOTE = (24 * 60 * 60) / HOT_ARTICLE_VOTES_NUMS;
     /**
      * 文章投票用户集合的redis key前缀
      */
